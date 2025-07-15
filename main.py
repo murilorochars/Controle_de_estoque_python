@@ -11,10 +11,8 @@ class ControleEstoque:
         self.root.geometry("1000x700")
         self.root.minsize(900, 600)
         
-        # Configurar estilo
         self.configurar_estilos()
         
-        # Criar layout principal
         self.criar_interface()
         self.carregar_produtos()
     
@@ -22,7 +20,6 @@ class ControleEstoque:
         style = ttk.Style()
         style.theme_use('clam')
         
-        # Configurar cores
         style.configure('TFrame', background='#f0f0f0')
         style.configure('TLabel', background='#f0f0f0', font=('Helvetica', 10))
         style.configure('TButton', font=('Helvetica', 10), padding=6)
@@ -32,7 +29,6 @@ class ControleEstoque:
         style.configure('TLabelframe', background='#f0f0f0', font=('Helvetica', 10, 'bold'))
         style.configure('TLabelframe.Label', background='#f0f0f0')
         
-        # Cores personalizadas
         style.map('TButton',
                   foreground=[('active', 'black'), ('!disabled', 'black')],
                   background=[('active', '#e1e1e1'), ('!disabled', '#d9d9d9')])
@@ -42,11 +38,9 @@ class ControleEstoque:
                   foreground=[('selected', 'white')])
     
     def criar_interface(self):
-        # Frame principal com padding
         main_frame = ttk.Frame(self.root, padding=(15, 15, 15, 15))
         main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Título do sistema
         title_frame = ttk.Frame(main_frame)
         title_frame.pack(fill=tk.X, pady=(0, 15))
         
@@ -54,15 +48,12 @@ class ControleEstoque:
         ttk.Label(title_frame, text="CONTROLE DE ESTOQUE", font=title_font, 
                  background='#f0f0f0').pack(side=tk.LEFT)
         
-        # Frame para tabela e scrollbar
         table_frame = ttk.Frame(main_frame)
         table_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Scrollbar vertical
         vsb = ttk.Scrollbar(table_frame, orient="vertical")
         vsb.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Tabela de produtos com estilo melhorado
         self.tree = ttk.Treeview(
             table_frame,
             columns=('ID', 'Nome', 'Quantidade', 'Mínimo', 'Status'),
@@ -72,7 +63,6 @@ class ControleEstoque:
         )
         vsb.config(command=self.tree.yview)
         
-        # Configurar colunas
         self.tree.heading('ID', text='ID', anchor=tk.CENTER)
         self.tree.heading('Nome', text='NOME DO PRODUTO', anchor=tk.CENTER)
         self.tree.heading('Quantidade', text='QUANTIDADE', anchor=tk.CENTER)
@@ -87,7 +77,6 @@ class ControleEstoque:
         
         self.tree.pack(fill=tk.BOTH, expand=True)
         
-        # Frame de botões com estilo moderno
         btn_frame = ttk.Frame(main_frame)
         btn_frame.pack(fill=tk.X, pady=(15, 10))
         
@@ -95,14 +84,13 @@ class ControleEstoque:
         
         ttk.Button(btn_frame, text="↻ Atualizar", command=self.carregar_produtos, **button_style).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="✏ Editar", command=self.abrir_tela_atualizar, **button_style).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="🗑 Excluir", command=self.excluir_produto, **button_style).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="🔍 Filtrar", command=self.abrir_filtro, **button_style).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="⚠ Enviar Alertas", command=self.enviar_alertas, **button_style).pack(side=tk.LEFT, padx=5)
         
-        # Frame de cadastro com estilo melhorado
         form_frame = ttk.LabelFrame(main_frame, text=" CADASTRAR NOVO PRODUTO ", padding=(15, 10, 15, 15))
         form_frame.pack(fill=tk.X, pady=(10, 0))
         
-        # Formulário em grid
         form_frame.columnconfigure(1, weight=1)
         
         ttk.Label(form_frame, text="Nome do Produto:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
@@ -120,12 +108,32 @@ class ControleEstoque:
         ttk.Button(form_frame, text="➕ Cadastrar Produto", command=self.cadastrar_produto, 
                   style='Accent.TButton').grid(row=3, column=0, columnspan=2, pady=(10, 0), sticky=tk.EW)
         
-        # Adicionar um estilo especial para o botão principal
         style = ttk.Style()
         style.configure('Accent.TButton', font=('Helvetica', 10, 'bold'), 
                        foreground='white', background='#4a6984')
         style.map('Accent.TButton',
                  background=[('active', '#5a7a94'), ('!disabled', '#4a6984')])
+    
+    def excluir_produto(self):
+        item_selecionado = self.tree.selection()
+        if not item_selecionado:
+            messagebox.showwarning("Aviso", "Selecione um produto para excluir.", parent=self.root)
+            return
+            
+        item = self.tree.item(item_selecionado)
+        id_produto, nome, _, _, _ = item['values']
+        
+        resposta = messagebox.askyesno(
+            "Confirmar Exclusão",
+            f"Tem certeza que deseja excluir o produto '{nome}'?",
+            parent=self.root
+        )
+        
+        if resposta:
+            produto = Produto.get(Produto.id == id_produto)
+            produto.delete_instance()
+            self.carregar_produtos()
+            messagebox.showinfo("Sucesso", "Produto excluído com sucesso!", parent=self.root)
     
     def carregar_produtos(self):
         for item in self.tree.get_children():
@@ -150,7 +158,6 @@ class ControleEstoque:
                 status
             ), tags=tags)
         
-        # Configurar cores para diferentes status
         self.tree.tag_configure('estoque_baixo', background='#ffdddd')
         self.tree.tag_configure('atencao', background='#fff3cd')
     
@@ -216,10 +223,8 @@ class ControleEstoque:
         update_window.geometry("400x300")
         update_window.resizable(False, False)
         
-        # Centralizar a janela
         self.centralizar_janela(update_window)
         
-        # Frame principal
         main_frame = ttk.Frame(update_window, padding=(20, 15))
         main_frame.pack(fill=tk.BOTH, expand=True)
         
@@ -238,7 +243,6 @@ class ControleEstoque:
         minimo_entry.pack(fill=tk.X, pady=(0, 20))
         minimo_entry.insert(0, minimo)
         
-        # Frame para botões
         btn_frame = ttk.Frame(main_frame)
         btn_frame.pack(fill=tk.X)
         
@@ -284,10 +288,8 @@ class ControleEstoque:
         filtro_window.geometry("350x250")
         filtro_window.resizable(False, False)
         
-        # Centralizar a janela
         self.centralizar_janela(filtro_window)
         
-        # Frame principal
         main_frame = ttk.Frame(filtro_window, padding=(20, 15))
         main_frame.pack(fill=tk.BOTH, expand=True)
         
@@ -302,7 +304,7 @@ class ControleEstoque:
             elif tipo == 'normal':
                 produtos = Produto.select().where(Produto.quantidade >= Produto.minimo)
                 titulo = "Produtos com Estoque Normal"
-            else:  # todos
+            else:  
                 produtos = Produto.select()
                 titulo = "Todos os Produtos"
             
@@ -337,10 +339,8 @@ class ControleEstoque:
         ttk.Button(main_frame, text="Todos os Produtos", 
                   command=lambda: aplicar_filtro('todos')).pack(fill=tk.X, pady=5)
         
-        # Separador
         ttk.Separator(main_frame, orient=tk.HORIZONTAL).pack(fill=tk.X, pady=10)
         
-        # Pesquisa por nome
         ttk.Label(main_frame, text="Pesquisar por Nome:").pack(anchor=tk.W, pady=(0, 5))
         
         nome_frame = ttk.Frame(main_frame)
